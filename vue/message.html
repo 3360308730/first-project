@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+
+<body>
+	<div id="app">
+		<!-- 添加留言 -->
+		<el-dialog :visible.sync="visible" title="添加留言" width="30%">
+			<el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+				<el-form-item label="留言内容" prop="content">
+					<el-input v-model="ruleForm.content"></el-input>
+				</el-form-item>
+				<el-form-item>
+					<el-button type="primary" @click="addForm('ruleForm')">立即提交</el-button>
+					<el-button @click="resetForm('ruleForm')">重置</el-button>
+				</el-form-item>
+			</el-form>
+		</el-dialog>
+
+		<div style="margin-top: 60px;margin-left:80px;border: 0px solid red;overflow: hidden;">
+			<el-form :model="searchRuleForm" ref="searchRuleForm" label-width="100px" class="demo-ruleForm">
+				<el-form-item>
+					<el-button type="primary" icon="el-icon-plus" style="position: relative;left: -100px;"
+						@click="add()">添加留言</el-button>
+				</el-form-item>
+			</el-form>
+			<div v-for="item in tableData" style="height: 230px;">
+				<div
+					style="width: 700px;height: 150px;border: 1px solid #DCDCDC;border-radius: 8px;box-shadow: 10px 10px 5px #888888;;">
+					<div class="header"
+						style="margin-left: 18px; padding: 10px; width:640px;height: 40px;border-bottom: 1px solid #00F7DE;">
+						<font style="font-weight: bold;float: left;">留言</font>
+						<font style="font-size: 13px;color: gray;float: right;margin-right: 80px;">{{item.username}} |
+							{{item.date}}</font>
+					</div>
+					<div class="content"
+						style="margin-left: 18px; padding: 10px; padding-bottom: 40px; width:640px;height: 25px;">
+						<font style="float: left;">{{item.content}}</font>
+					</div>
+				</div>
+				<div style="margin-top: 10px; width: 700px;height: auto;border: 0px solid #009F95;">
+					<div class="content"
+						style="margin-left: 18px; padding: 10px; padding-bottom: 10px; width:640px;height:100px;font-size: 13px;color: gray;">
+						<font style="float: left;">管理员：{{item.adminname}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font>
+						<font style="float: left;">回复内容：{{item.admincontent}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font>
+						<font style="float: left;margin-left: 0px;">回复时间：{{item.admindate}}</font>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<el-pagination style="margin-top: 20px;float: right;position: relative;top: 0px;" background
+			layout="prev, pager, next" :page-size="pageSize" :total="total" :current-page.sync="currentPage"
+			@current-change="page">
+		</el-pagination>
+	</div>
+</body>
+<script src="js/vue.js"></script>
+<script src="js/elementui.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+	new Vue({
+		el: '#app',
+		methods: {
+			page(currentPage) {
+				const _this = this
+				axios.get('http://localhost:8181/message/list?page=' + currentPage + '&limit=' + _this.pageSize).then(function (resp) {
+					_this.tableData = resp.data.data
+					_this.total = resp.data.count
+				})
+			},
+			add() {
+				this.visible = true
+			},
+			resetForm(formName) {
+				this.$refs[formName].resetFields();
+			},
+			addForm(formName) {
+				this.$refs[formName].validate((valid) => {
+					if (valid) {
+						let _this = this
+						axios.post('http://localhost:8181/message/add', _this.ruleForm).then(function (response) {
+							if (response.data.code == 0) {
+								_this.$alert('添加成功', '', {
+									confirmButtonText: '确定',
+									callback: action => {
+										location.reload()
+									}
+								});
+							} else {
+								_this.$alert(response.data.msg, '提示', {
+									confirmButtonText: '确定'
+								});
+							}
+						})
+					} else {
+						console.log('error submit!!');
+						return false;
+					}
+				});
+			},
+		},
+		mounted: function () {
+			const _this = this
+			axios.get('http://localhost:8181/message/list').then(function (resp) {
+				_this.tableData = resp.data.data
+				_this.total = resp.data.count
+			})
+		},
+		data() {
+			return {
+				tableData: null,
+				pageSize: 3,
+				total: null,
+				currentPage: 1,
+				tableData: null,
+				ruleForm: {
+					content: ''
+				},
+				rules: {
+					content: [{ required: true, message: '请输入留言内容', trigger: 'blur' }]
+				},
+				visible: false
+			}
+		}
+	})
+</script>
+
+</html>

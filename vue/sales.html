@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+	</head>
+	<body>
+		<div id="app">
+			<div style="margin-top: 60px;margin-left:80px;border: 0px solid red;overflow: hidden;" >
+					<el-form :model="searchRuleForm" ref="searchRuleForm" label-width="100px" class="demo-ruleForm">
+						<el-form-item prop="status" label="生效状态：">
+							<el-radio v-model="searchRuleForm.status" label="已过期" style="margin-left: -80px;">已过期</el-radio>
+							<el-radio v-model="searchRuleForm.status" label="生效中">生效中</el-radio>
+							<el-button type="primary" icon="el-icon-search" style="float: left;position: relative;left: 380px;" @click="submitForm()">搜索</el-button>
+							<el-button type="warning" icon="el-icon-refresh-right" style="position: relative;left: 30px;" @click="resetForm('searchRuleForm')">重置</el-button>
+						</el-form-item>
+					</el-form>
+					<el-table
+						:data="tableData"
+						border
+						stripe
+						style="relative;top: 0px;">
+					<el-table-column
+							fixed
+							prop="id"
+							label="ID"
+							width="160">
+					</el-table-column>
+					<el-table-column
+							prop="discount"
+							label="促销活动"
+							width="290">
+					</el-table-column>
+					<el-table-column
+							prop="date"
+							label="生效日期"
+							width="290">
+					</el-table-column>
+					<el-table-column
+							prop="losedate"
+							label="失效日期"
+							width="290">
+					</el-table-column>
+					<el-table-column
+							prop="status"
+							label="生效状态">
+							<template slot-scope="scope">
+								<el-tag :type="filterTag(scope.row.status)">{{scope.row.status}}</el-tag>
+							</template>
+					</el-table-column>
+					</el-table>
+					<el-pagination style="margin-top: 20px;float: right;position: relative;top: 0px;"
+								   background
+								   layout="prev, pager, next"
+								   :page-size="pageSize"
+								   :total="total"
+								   :current-page.sync="currentPage"
+								   @current-change="page">
+					</el-pagination>
+			</div>
+		</div>
+	</body>
+	<script src="js/vue.js"></script>
+	<script src="js/elementui.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+	<script>
+	  new Vue({
+		el: '#app',
+		methods: {
+			submitForm() {
+				const _this = this
+				//让翻页复原
+				_this.currentPage=1
+				axios.get('http://localhost:8181/sales/list?status='+_this.searchRuleForm.status+'&page='+_this.currentPage+'&limit='+_this.pageSize).then(function (resp) {
+					_this.tableData = resp.data.data
+					_this.total = resp.data.count
+				})
+			},
+			page(currentPage){
+				const _this = this
+				axios.get('http://localhost:8181/sales/list?status='+_this.searchRuleForm.status+'&page='+currentPage+'&limit='+_this.pageSize).then(function (resp) {
+					_this.tableData = resp.data.data
+					_this.total = resp.data.count
+				})
+			},
+			resetForm(formName) {
+			  this.$refs[formName].resetFields();
+			},
+			filterTag(value) {
+				let tag = ''
+				if(value == '生效中'){
+					tag = 'success'
+				}
+				if(value == '已过期'){
+					tag = 'danger'
+				}
+				return tag;
+			  }
+		},
+		mounted: function () {
+			let user = JSON.parse(window.localStorage.getItem('user'))
+			this.ruleForm = user
+			const _this = this
+			axios.get('http://localhost:8181/sales/list').then(function (resp) {
+				_this.tableData = resp.data.data
+				_this.total = resp.data.count
+			})
+		},
+		data(){
+			return {
+				tableData:null,
+				pageSize:5,
+				total:null,
+				currentPage:1,
+				ruleForm: '',
+				searchRuleForm: {
+				  status:''
+				}
+			}
+		}
+	  })
+	</script>
+</html>
