@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+	</head>
+	<body>
+		<div id="app">
+			<div style="margin-top: 60px;margin-left:80px;border: 0px solid red;overflow: hidden;" >
+					<el-form :model="searchRuleForm" ref="searchRuleForm" label-width="100px" class="demo-ruleForm">
+						<el-form-item prop="carnumber" label="车牌号：" style="margin-left: -32px;">
+							<el-input v-model="searchRuleForm.carnumber" placeholder="请输入车牌号" style="width: 230px;float: left"></el-input>
+						</el-form-item>
+						<el-form-item prop="username" label="车主姓名：" style="position: relative;top: -63px;left: 300px;">
+							<el-input v-model="searchRuleForm.username" placeholder="请输入车主姓名" style="width: 230px;float: left"></el-input>
+							<el-button type="primary" icon="el-icon-search" style="float: left;position: relative;left: 150px;" @click="submitForm()">搜索</el-button>
+							<el-button type="warning" icon="el-icon-refresh-right" style="position: relative;left: -50px;" @click="resetForm('searchRuleForm')">重置</el-button>
+						</el-form-item>		
+					</el-form>
+					<el-table
+						:data="tableData"
+						border
+						stripe
+						style="relative;top: -60px;">
+					<el-table-column
+							fixed
+							prop="id"
+							label="ID"
+							width="220">
+					</el-table-column>
+					<el-table-column
+							prop="number"
+							label="车牌号"
+							width="330">
+					</el-table-column>
+					<el-table-column
+							prop="username"
+							label="车主姓名"
+							width="330">
+					</el-table-column>
+					<el-table-column
+							prop="status"
+							label="洗车状态">
+							  <template slot-scope="scope">
+								<el-tag :type="filterTag(scope.row.status)">{{scope.row.status}}</el-tag>
+							  </template>
+					</el-table-column>
+					</el-table>
+					<el-pagination style="margin-top: 20px;float: right;position: relative;top: -60px;"
+								   background
+								   layout="prev, pager, next"
+								   :page-size="pageSize"
+								   :total="total"
+								   :current-page.sync="currentPage"
+								   @current-change="page">
+					</el-pagination>
+			</div>
+		</div>
+	</body>
+	<script src="js/vue.js"></script>
+	<script src="js/elementui.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+	<script>
+	  new Vue({
+		el: '#app',
+		methods: {
+			submitForm() {
+				const _this = this
+				//让翻页复原
+				_this.currentPage=1
+				axios.get('http://localhost:8181/car/list?carnumber='+_this.searchRuleForm.carnumber+'&username='+_this.searchRuleForm.username+'&page='+_this.currentPage+'&limit='+_this.pageSize).then(function (resp) {
+					_this.tableData = resp.data.data
+					_this.total = resp.data.count
+				})
+			},
+			page(currentPage){
+				const _this = this
+				axios.get('http://localhost:8181/car/list?carnumber='+_this.searchRuleForm.carnumber+'&username='+_this.searchRuleForm.username+'&page='+currentPage+'&limit='+_this.pageSize).then(function (resp) {
+					_this.tableData = resp.data.data
+					_this.total = resp.data.count
+				})
+			},
+			resetForm(formName) {
+			  this.$refs[formName].resetFields();
+			},
+			filterTag(value) {
+				let tag = ''
+				if(value == '清洗中'){
+					tag = 'success'
+				}
+				if(value == '排队中'){
+					tag = 'danger'
+				}
+				return tag;
+			  }
+		},
+		mounted: function () {
+			let user = JSON.parse(window.localStorage.getItem('user'))
+			this.ruleForm = user
+			const _this = this
+			axios.get('http://localhost:8181/car/list').then(function (resp) {
+				_this.tableData = resp.data.data
+				_this.total = resp.data.count
+			})
+		},
+		data(){
+			return {
+				tableData:null,
+				pageSize:5,
+				total:null,
+				currentPage:1,
+				ruleForm: '',
+				searchRuleForm: {
+				  carnumber:'',
+				  username:''
+				},
+				ruleForm: {
+				  carnumber:'',
+				  cartype:'',
+				  color:'',
+				  price:'',
+				  rentprice:'',
+				  deposit:'',
+				  isrenting:0,
+				  description:'',
+				  carimg:''
+				},
+				rules: {
+				  carnumber: [{required: true, message: '请输入车牌号', trigger: 'blur'}],
+				  cartype: [{required: true, message: '请输入车辆类型', trigger: 'blur'}],
+				  color: [{required: true, message: '请输入车辆颜色', trigger: 'blur'}],
+				  price: [{required: true, message: '请输入车辆价格', trigger: 'blur'}],
+				  rentprice: [{required: true, message: '请输入出租价格', trigger: 'blur'}],
+				  deposit: [{required: true, message: '请输入出租押金', trigger: 'blur'}],
+				  description: [{required: true, message: '请输入车辆描述', trigger: 'blur'}],
+				  carimg: [{required: true, message: '请上传车辆照片', trigger: 'blur'}]
+				},
+			}
+		}
+	  })
+	</script>
+</html>
