@@ -15,7 +15,7 @@ public class Main {
                 .globalConfig(builder -> {
                     builder.author("cxj") // 设置作者
 //                            .enableSwagger() // 开启 swagger 模式
-                            .outputDir("C:\\Users\\www33\\Desktop\\wash_car\\src\\main\\java"); // 指定输出目录
+                            .outputDir("C:\\Users\\www33\\Desktop\\first-project\\first-project\\wash_car\\src\\main\\java"); // 指定输出目录
                 })
                 .dataSourceConfig(builder ->
                         builder.typeConvertHandler((globalConfig, typeRegistry, metaInfo) -> {
@@ -30,10 +30,10 @@ public class Main {
                 .packageConfig(builder ->
                         builder.parent("com.cxj") // 设置父包名
                                 .moduleName("wash_car") // 设置父包模块名
-                                .pathInfo(Collections.singletonMap(OutputFile.xml, "C:\\Users\\www33\\Desktop\\wash_car")) // 设置mapperXml生成路径
+
                 )
                 .strategyConfig(builder ->
-                        builder.addInclude("menu","admin","after_sales_message","car","message","sales","user","work","worker") // 设置需要生成的表名
+                        builder.addInclude("car") // 设置需要生成的表名
                                 .addTablePrefix("t_", "c_") // 设置过滤表前缀
                 )
                 .templateEngine(new FreemarkerTemplateEngine()) // 使用Freemarker引擎模板，默认的是Velocity引擎模板
