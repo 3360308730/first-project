@@ -4,15 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.cxj.wash_car.common.Cache;
 import com.cxj.wash_car.common.ResultObj;
-import com.cxj.wash_car.entity.AccountForm;
-import com.cxj.wash_car.entity.Admin;
-import com.cxj.wash_car.entity.User;
-import com.cxj.wash_car.entity.Worker;
+import com.cxj.wash_car.entity.*;
 import com.cxj.wash_car.mapper.UserMapper;
-import com.cxj.wash_car.service.IAdminService;
-import com.cxj.wash_car.service.IUserService;
-import com.cxj.wash_car.service.IWorkerService;
+import com.cxj.wash_car.service.*;
 import com.wf.captcha.SpecCaptcha;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,7 +28,8 @@ public class RedirectController {
     public IWorkerService iWorkerService;
     @Autowired
     public IAdminService iAdminService;
-
+    @Autowired
+    public ICarService iCarService;
     @GetMapping("/getCode")
     public String getCode() {
         SpecCaptcha specCaptcha = new SpecCaptcha(130, 48, 4);
@@ -57,7 +54,11 @@ public class RedirectController {
                     return LOGIN_ERROR_PASSWORD;
                 if(!code.equals(accountForm.getCode()))
                     return LOGIN_ERROR_CODE;
-                resultObj=new ResultObj(0,"登录成功",user);
+                Car car = this.iCarService.getById(user.getCid());
+                UserVO userVO = new UserVO();
+                BeanUtils.copyProperties(user,userVO);
+                userVO.setCarNumber(car.getNumber());
+                resultObj=new ResultObj(0,"登录成功",userVO);
                 return resultObj;
             //工人登录
             case 2:
