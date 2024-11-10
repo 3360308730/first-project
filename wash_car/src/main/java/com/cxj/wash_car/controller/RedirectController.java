@@ -1,23 +1,19 @@
 package com.cxj.wash_car.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.cxj.wash_car.common.Cache;
 import com.cxj.wash_car.common.ResultObj;
 import com.cxj.wash_car.entity.*;
-import com.cxj.wash_car.mapper.UserMapper;
 import com.cxj.wash_car.service.*;
+import com.cxj.wash_car.vo.UserVO;
 import com.wf.captcha.SpecCaptcha;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Locale;
-
 import static com.cxj.wash_car.common.Cache.map;
 import static com.cxj.wash_car.common.ResultObj.*;
-import static net.sf.jsqlparser.util.validation.metadata.NamedObject.user;
 
 @RestController
 public class RedirectController {
@@ -54,7 +50,7 @@ public class RedirectController {
                     return LOGIN_ERROR_PASSWORD;
                 if(!code.equals(accountForm.getCode()))
                     return LOGIN_ERROR_CODE;
-                Car car = this.iCarService.getById(user.getCid());
+                 Car car = this.iCarService.getById(user.getCid());
                 UserVO userVO = new UserVO();
                 BeanUtils.copyProperties(user,userVO);
                 userVO.setCarNumber(car.getNumber());

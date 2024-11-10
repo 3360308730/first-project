@@ -1,4 +1,4 @@
-package com.cxj.wash_car.service;
+package com.cxj.wash_car.vo;
 
 import com.cxj.wash_car.entity.User;
 import lombok.Data;
